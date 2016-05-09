@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package schema;
+
+option java_package = "com.google.codelabs.migratingtojobs";
+option java_outer_classname = "CatalogItemProtos";
+
+message Book {
+    string title = 1;
+    string author = 2;
+}
+
+message CatalogItem {
+    Book book = 1;
+    int32 downloadProgress = 2;
+    enum Status {
+        UNKNOWN = 0;
+        AVAILABLE = 1;
+        UNAVAILABLE = 2;
+        DOWNLOADING = 3;
+    }
+    Status status = 3;
+}
+
+message CatalogItemStore {
+    repeated CatalogItem items = 1;
+}
