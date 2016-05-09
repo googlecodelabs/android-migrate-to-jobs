@@ -1,4 +1,4 @@
-package com.google.codelabs.migratingtojobs.model;
+package com.google.codelabs.migratingtojobs.common;
 
 import android.support.annotation.NonNull;
 

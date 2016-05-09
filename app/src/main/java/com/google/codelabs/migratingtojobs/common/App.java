@@ -1,4 +1,4 @@
-package com.google.codelabs.migratingtojobs;
+package com.google.codelabs.migratingtojobs.common;
 
 import android.app.Application;
 import android.content.SharedPreferences;
@@ -6,10 +6,6 @@ import android.net.ConnectivityManager;
 import android.util.Base64;
 import android.util.Log;
 
-import com.google.codelabs.migratingtojobs.logic.Brain;
-import com.google.codelabs.migratingtojobs.model.Book;
-import com.google.codelabs.migratingtojobs.model.CatalogItem;
-import com.google.codelabs.migratingtojobs.model.CatalogItemStore;
 import com.google.codelabs.migratingtojobs.nano.CatalogItemProtos;
 import com.google.protobuf.nano.InvalidProtocolBufferNanoException;
 
@@ -24,7 +20,7 @@ public class App extends Application {
     private Brain mBrain;
 
     private Downloader mDownloader;
-    private ConnectivityManager mConnManager;
+
     private final List<CatalogItem> defaultBooks = Arrays.asList(
             new CatalogItem(
                     new Book("Abarat", "Clive Barker"),
@@ -49,9 +45,11 @@ public class App extends Application {
         super.onCreate();
 
         mCatalogItems = readCatalogItems(getSharedPreferences(PREFERENCES_NAME, 0));
-        mConnManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        mDownloader = new Downloader(Executors.newCachedThreadPool(), mConnManager);
-        mBrain = new Brain(mCatalogItems, mConnManager);
+        mDownloader = new Downloader(
+                Executors.newCachedThreadPool(),
+                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE));
+
+        mBrain = new Brain(mDownloader);
     }
 
     @Override

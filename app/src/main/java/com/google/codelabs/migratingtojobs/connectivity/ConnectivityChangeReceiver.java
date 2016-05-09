@@ -1,4 +1,4 @@
-package com.google.codelabs.migratingtojobs;
+package com.google.codelabs.migratingtojobs.connectivity;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,12 +8,12 @@ import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.codelabs.migratingtojobs.model.CatalogItem;
-import com.google.codelabs.migratingtojobs.model.CatalogItemStore;
+import com.google.codelabs.migratingtojobs.common.App;
+import com.google.codelabs.migratingtojobs.common.Downloader;
+import com.google.codelabs.migratingtojobs.common.Util;
+import com.google.codelabs.migratingtojobs.common.CatalogItem;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class ConnectivityChangeReceiver extends BroadcastReceiver {
@@ -57,7 +57,9 @@ public class ConnectivityChangeReceiver extends BroadcastReceiver {
 
             int res = Downloader.FAILURE;
             try {
-                res = result.get();
+                if (!result.isCancelled()) {
+                    res = result.get();
+                }
             } catch (Throwable e) {
                 Log.e(TAG, "unexpected error while gathering results", e);
             }

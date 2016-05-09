@@ -1,4 +1,4 @@
-package com.google.codelabs.migratingtojobs.model;
+package com.google.codelabs.migratingtojobs.common;
 
 public class Book {
     public String title;

@@ -3,7 +3,7 @@
 
     <data>
         <import type="android.view.View"/>
-        <import type="com.google.codelabs.migratingtojobs.model.CatalogItem"/>
+        <import type="com.google.codelabs.migratingtojobs.common.CatalogItem"/>
 
         <variable name="item" type="CatalogItem" />
     </data>

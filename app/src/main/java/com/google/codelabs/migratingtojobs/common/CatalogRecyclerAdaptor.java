@@ -1,4 +1,4 @@
-package com.google.codelabs.migratingtojobs.adaptor;
+package com.google.codelabs.migratingtojobs.common;
 
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
@@ -10,10 +10,6 @@ import android.view.ViewGroup;
 
 import com.google.codelabs.migratingtojobs.BR;
 import com.google.codelabs.migratingtojobs.R;
-import com.google.codelabs.migratingtojobs.model.CatalogItem;
-import com.google.codelabs.migratingtojobs.model.CatalogItemStore;
-
-import java.util.List;
 
 public class CatalogRecyclerAdaptor extends RecyclerView.Adapter<CatalogRecyclerAdaptor.Holder> {
     private CatalogItemStore mItems;

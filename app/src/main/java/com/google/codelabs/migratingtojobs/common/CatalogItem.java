@@ -1,6 +1,5 @@
-package com.google.codelabs.migratingtojobs.model;
+package com.google.codelabs.migratingtojobs.common;
 
-import android.databinding.Bindable;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
 import android.support.annotation.IntDef;
@@ -12,13 +11,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public class CatalogItem {
-    @IntDef({AVAILABLE, UNAVAILABLE, DOWNLOADING})
+
+    @IntDef({AVAILABLE, UNAVAILABLE, DOWNLOADING, ERROR})
     @Retention(RetentionPolicy.SOURCE)
     @interface ItemStatus {}
 
     public final static int AVAILABLE = CatalogItemProtos.CatalogItem.AVAILABLE;
     public final static int UNAVAILABLE = CatalogItemProtos.CatalogItem.UNAVAILABLE;
     public final static int DOWNLOADING = CatalogItemProtos.CatalogItem.DOWNLOADING;
+    public static final int ERROR = CatalogItemProtos.CatalogItem.ERROR;
 
     public final ObservableField<Book> book = new ObservableField<>();
 
@@ -49,10 +50,6 @@ public class CatalogItem {
 
     public CatalogItem(Book book) {
         this(book, 0, UNAVAILABLE);
-    }
-
-    public boolean isAvailable() {
-        return status.get() == AVAILABLE;
     }
 
     public boolean isDownloading() {

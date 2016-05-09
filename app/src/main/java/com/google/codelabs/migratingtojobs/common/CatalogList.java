@@ -1,4 +1,4 @@
-package com.google.codelabs.migratingtojobs.ui;
+package com.google.codelabs.migratingtojobs.common;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,12 +8,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
-import com.google.codelabs.migratingtojobs.App;
 import com.google.codelabs.migratingtojobs.R;
-import com.google.codelabs.migratingtojobs.adaptor.CatalogRecyclerAdaptor;
-import com.google.codelabs.migratingtojobs.logic.Brain;
 
 public class CatalogList extends AppCompatActivity {
 

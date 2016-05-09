@@ -18,6 +18,7 @@ message CatalogItem {
         AVAILABLE = 1;
         UNAVAILABLE = 2;
         DOWNLOADING = 3;
+        ERROR = 4;
     }
     Status status = 3;
 }
