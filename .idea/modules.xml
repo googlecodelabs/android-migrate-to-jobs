@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MigratingToJobs.iml" filepath="$PROJECT_DIR$/MigratingToJobs.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jobscheduler-codelab.iml" filepath="$PROJECT_DIR$/jobscheduler-codelab.iml" />
     </modules>
   </component>
 </project>
