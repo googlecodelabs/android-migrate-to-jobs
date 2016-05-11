@@ -1,18 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.codelabs.migratingtojobs">
+    package="com.google.codelabs.migratingtojobs.common">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name=".common.App"
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".common.CatalogList"
+            android:name=".CatalogList"
             android:label="@string/title_activity_catalog_list"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -21,12 +20,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <receiver android:name=".connectivity.ConnectivityChangeReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
     </application>
-
 </manifest>
