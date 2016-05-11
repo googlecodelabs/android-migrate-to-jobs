@@ -40,13 +40,13 @@ public class Downloader {
     }
 
     /** Start downloading the provided CatalogItem. */
-    public Future<Integer> start(final CatalogItem item) {
+    public Future<Integer> start(final CatalogItem item, OnCompleteCallback callback) {
         Future<Integer> future = mMap.get(item);
         if (future != null) {
             return future;
         }
 
-        future = mExecutorService.submit(new DownloadRunner(item));
+        future = mExecutorService.submit(new DownloadRunner(item, callback));
         mMap.put(item, future);
         return future;
     }
@@ -59,35 +59,53 @@ public class Downloader {
         }
     }
 
+    public interface OnCompleteCallback {
+        void onComplete(CatalogItem item, int status);
+    }
+
     private class DownloadRunner implements Callable<Integer> {
         private final CatalogItem mItem;
+        private final OnCompleteCallback mCallback;
 
-        public DownloadRunner(CatalogItem item) {
+        public DownloadRunner(CatalogItem item, OnCompleteCallback callback) {
             mItem = item;
+            mCallback = callback;
+        }
+
+        public int run() throws Exception {
+            for (int i = 1 + mItem.progress.get(); i <= 100; i++) {
+                if (!Util.isNetworkActive(Downloader.this.mConnManager)) {
+                    // simulate a network failure
+                    return FAILURE;
+                }
+
+                mItem.progress.set(i);
+                Thread.sleep(100);
+            }
+
+            if (mItem.progress.get() >= 100) {
+                return SUCCESS;
+            }
+
+            mItem.status.set(CatalogItem.ERROR);
+            return FAILURE;
         }
 
         @Override
         public Integer call() throws Exception {
+            Integer result = null;
+
             try {
-                for (int i = 1 + mItem.progress.get(); i <= 100; i++) {
-                    // simulate a network failure
-                    if (!Util.isNetworkActive(Downloader.this.mConnManager)) {
-                        return FAILURE;
-                    }
-
-                    mItem.progress.set(i);
-                    Thread.sleep(100);
-                }
-
-                if (mItem.progress.get() >= 100) {
-                    return SUCCESS;
-                }
-
-                mItem.status.set(CatalogItem.ERROR);
-                return FAILURE;
+                result = run();
             } finally {
                 mMap.remove(mItem);
+
+                if (mCallback != null) {
+                    mCallback.onComplete(mItem, result);
+                }
             }
+
+            return result;
         }
     }
 }

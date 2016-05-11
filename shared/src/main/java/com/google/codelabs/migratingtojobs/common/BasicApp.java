@@ -19,6 +19,7 @@ package com.google.codelabs.migratingtojobs.common;
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Log;
 
@@ -29,11 +30,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-public class App extends Application {
+public class BasicApp extends Application {
     private static final String PREFERENCES_NAME = "prefs";
     private static final String STORE_KEY = "key";
-    public static final String TAG = "App";
-    private Brain mBrain;
+    public static final String TAG = "BasicApp";
+    private BasicBrain mBrain;
 
     private Downloader mDownloader;
 
@@ -65,7 +66,12 @@ public class App extends Application {
                 Executors.newCachedThreadPool(),
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE));
 
-        mBrain = new Brain(mDownloader);
+        mBrain = createBrain(mDownloader);
+    }
+
+    @NonNull
+    protected BasicBrain createBrain(Downloader downloader) {
+        return new BasicBrain(downloader);
     }
 
     @Override
@@ -90,7 +96,7 @@ public class App extends Application {
     private CatalogItemStore readCatalogItems(SharedPreferences preferences) {
         String storeValue = preferences.getString(STORE_KEY, "");
         if ("".equals(storeValue)) {
-            Log.e("App", "No saved value in SharedPrefs, using default books");
+            Log.e(TAG, "No saved value in SharedPrefs, using default books");
             return new CatalogItemStore(defaultBooks);
         }
 
@@ -99,13 +105,13 @@ public class App extends Application {
                     CatalogItemProtos.CatalogItemStore.parseFrom(
                             Base64.decode(storeValue, Base64.NO_WRAP)));
         } catch (InvalidProtocolBufferNanoException e) {
-            Log.e("App", "Unable to parse serialized items", e);
+            Log.e(TAG, "Unable to parse serialized items", e);
         }
 
         return new CatalogItemStore(defaultBooks);
     }
 
-    public Brain getBrain() {
+    public BasicBrain getBrain() {
         return mBrain;
     }
 

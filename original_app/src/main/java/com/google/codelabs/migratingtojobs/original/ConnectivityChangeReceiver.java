@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.codelabs.migratingtojobs.connectivity;
+package com.google.codelabs.migratingtojobs.original;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,7 +24,7 @@ import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.codelabs.migratingtojobs.common.App;
+import com.google.codelabs.migratingtojobs.common.BasicApp;
 import com.google.codelabs.migratingtojobs.common.Downloader;
 import com.google.codelabs.migratingtojobs.common.Util;
 import com.google.codelabs.migratingtojobs.common.CatalogItem;
@@ -54,7 +54,7 @@ public class ConnectivityChangeReceiver extends BroadcastReceiver {
             return; // nothing we can do here
         }
 
-        App app = (App) context.getApplicationContext();
+        BasicApp app = (BasicApp) context.getApplicationContext();
         List<CatalogItem> downloadQueue = app.getCatalogStore().getDownloadQueue();
         if (downloadQueue == null || downloadQueue.isEmpty()) {
             // nothing to do
@@ -64,7 +64,7 @@ public class ConnectivityChangeReceiver extends BroadcastReceiver {
         Downloader downloader = app.getDownloader();
         SimpleArrayMap<CatalogItem, Future<Integer>> pendingResults = new SimpleArrayMap<>(downloadQueue.size());
         for (CatalogItem item : downloadQueue) {
-            pendingResults.put(item, downloader.start(item));
+            pendingResults.put(item, downloader.start(item, null));
         }
 
         for (int i = 0; i < pendingResults.size(); i++) {

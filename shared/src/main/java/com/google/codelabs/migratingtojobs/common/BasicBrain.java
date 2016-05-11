@@ -16,11 +16,17 @@
 
 package com.google.codelabs.migratingtojobs.common;
 
-/** Brain is responsible for connecting the UI to the business logic. */
-public final class Brain {
-    private final Downloader mDownloader;
+import android.util.Log;
 
-    public Brain(Downloader downloader) {
+import java.util.Locale;
+
+/** BasicBrain is responsible for connecting the UI to the business logic. */
+public class BasicBrain implements Downloader.OnCompleteCallback {
+    protected static final String TAG = "Brain";
+
+    protected final Downloader mDownloader;
+
+    public BasicBrain(Downloader downloader) {
         mDownloader = downloader;
     }
 
@@ -44,8 +50,14 @@ public final class Brain {
             case CatalogItem.UNAVAILABLE:
                 // if it was unavailable (or error'd), the user would like to (re)download it
                 item.status.set(CatalogItem.DOWNLOADING);
-                mDownloader.start(item);
+                mDownloader.start(item, this);
                 break;
         }
+    }
+
+    @Override
+    public void onComplete(CatalogItem item, int status) {
+        Log.i(TAG, String.format(Locale.US,
+                "Finished downloading %s with status %d", item.book.get().title, status));
     }
 }

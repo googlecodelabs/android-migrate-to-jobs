@@ -25,14 +25,12 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.google.codelabs.migratingtojobs.common.R;
-
 public class CatalogList extends AppCompatActivity {
 
     private RecyclerView mCatalogList;
 
     private CatalogRecyclerAdaptor mAdaptor;
-    private Brain mBrain;
+    private BasicBrain mBrain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +42,7 @@ public class CatalogList extends AppCompatActivity {
         mCatalogList = (RecyclerView) findViewById(R.id.catalog_list);
         mCatalogList.setLayoutManager(new LinearLayoutManager(this));
 
-        App app = ((App) getApplication());
+        BasicApp app = ((BasicApp) getApplication());
         mAdaptor = new CatalogRecyclerAdaptor(app.getCatalogStore());
         mBrain = app.getBrain();
 
@@ -54,7 +52,7 @@ public class CatalogList extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        ((App) getApplication()).writeCatalogItems();
+        ((BasicApp) getApplication()).writeCatalogItems();
         super.onPause();
     }
 
