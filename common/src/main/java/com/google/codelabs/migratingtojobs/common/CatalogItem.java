@@ -21,7 +21,7 @@ import android.databinding.ObservableInt;
 import android.support.annotation.IntDef;
 import android.support.annotation.IntRange;
 
-import com.google.codelabs.migratingtojobs.nano.CatalogItemProtos;
+import com.google.codelabs.migratingtojobs.common.nano.CatalogItemProtos;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

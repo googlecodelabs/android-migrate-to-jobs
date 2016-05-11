@@ -1,4 +1,4 @@
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
 apply plugin: 'com.google.protobuf'
 
 protobuf {
@@ -12,6 +12,7 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
+        applicationId "com.google.codelabs.migratingtojobs"
         minSdkVersion 21
         targetSdkVersion 23
         versionCode 1
@@ -29,9 +30,10 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.+'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
     compile 'com.google.protobuf.nano:protobuf-javanano:3.0.0-alpha-2'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
+    compile project(':common')
 }

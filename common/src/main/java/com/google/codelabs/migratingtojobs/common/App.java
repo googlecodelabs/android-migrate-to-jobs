@@ -22,7 +22,7 @@ import android.net.ConnectivityManager;
 import android.util.Base64;
 import android.util.Log;
 
-import com.google.codelabs.migratingtojobs.nano.CatalogItemProtos;
+import com.google.codelabs.migratingtojobs.common.nano.CatalogItemProtos;
 import com.google.protobuf.nano.InvalidProtocolBufferNanoException;
 
 import java.util.Arrays;

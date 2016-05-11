@@ -18,7 +18,7 @@ package com.google.codelabs.migratingtojobs.common;
 
 import android.support.annotation.NonNull;
 
-import com.google.codelabs.migratingtojobs.nano.CatalogItemProtos;
+import com.google.codelabs.migratingtojobs.common.nano.CatalogItemProtos;
 import com.google.protobuf.nano.MessageNano;
 
 import java.util.LinkedList;

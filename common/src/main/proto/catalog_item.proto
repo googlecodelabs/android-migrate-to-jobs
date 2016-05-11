@@ -18,7 +18,7 @@ syntax = "proto3";
 
 package schema;
 
-option java_package = "com.google.codelabs.migratingtojobs";
+option java_package = "com.google.codelabs.migratingtojobs.common";
 option java_outer_classname = "CatalogItemProtos";
 
 message Book {

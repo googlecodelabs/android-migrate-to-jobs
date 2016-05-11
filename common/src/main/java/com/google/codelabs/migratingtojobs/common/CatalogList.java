@@ -25,7 +25,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.google.codelabs.migratingtojobs.R;
+import com.google.codelabs.migratingtojobs.common.R;
 
 public class CatalogList extends AppCompatActivity {
 

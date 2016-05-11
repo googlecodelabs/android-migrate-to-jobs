@@ -24,8 +24,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.codelabs.migratingtojobs.BR;
-import com.google.codelabs.migratingtojobs.R;
+import com.google.codelabs.migratingtojobs.common.BR;
+import com.google.codelabs.migratingtojobs.common.R;
 
 public class CatalogRecyclerAdaptor extends RecyclerView.Adapter<CatalogRecyclerAdaptor.Holder> {
     private CatalogItemStore mItems;
