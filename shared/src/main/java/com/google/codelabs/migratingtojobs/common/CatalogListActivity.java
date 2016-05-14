@@ -25,7 +25,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
-public class CatalogList extends AppCompatActivity {
+public class CatalogListActivity extends AppCompatActivity {
 
     private RecyclerView mCatalogList;
 

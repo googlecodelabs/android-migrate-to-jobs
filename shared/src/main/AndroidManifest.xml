@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".CatalogList"
+            android:name=".CatalogListActivity"
             android:label="@string/title_activity_catalog_list"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
