@@ -1,17 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.codelabs.migratingtojobs.original_app">
+    package="com.google.codelabs.migratingtojobs.jobdownloads">
 
     <application android:label="@string/app_name">
-        <receiver android:name=".ConnectivityChangeReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
-
+        <service android:name=".DownloaderJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true" />
         <activity
-            android:name=".ErrorLoggingCatalogListActivity"
-            android:label="@string/app_name"
+            android:name=".JobSchedulingCatalogListActivity"
+            android:label="[JobS] Book Catalog"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

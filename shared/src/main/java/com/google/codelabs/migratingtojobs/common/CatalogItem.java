@@ -16,17 +16,25 @@
 
 package com.google.codelabs.migratingtojobs.common;
 
-import android.databinding.ObservableField;
-import android.databinding.ObservableInt;
+import android.databinding.Bindable;
+import android.databinding.BindingAdapter;
+import android.databinding.Observable;
+import android.databinding.PropertyChangeRegistry;
 import android.support.annotation.IntDef;
 import android.support.annotation.IntRange;
+import android.util.Log;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.google.codelabs.migratingtojobs.common.nano.CatalogItemProtos;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-public class CatalogItem {
+public class CatalogItem extends BaseEventListener implements Observable {
+    private static final String TAG = "CatalogItem";
+
+    private final PropertyChangeRegistry mPropertyChangeRegistry = new PropertyChangeRegistry();
 
     @IntDef({AVAILABLE, UNAVAILABLE, DOWNLOADING, ERROR})
     @Retention(RetentionPolicy.SOURCE)
@@ -35,40 +43,173 @@ public class CatalogItem {
     public final static int AVAILABLE = CatalogItemProtos.CatalogItem.AVAILABLE;
     public final static int UNAVAILABLE = CatalogItemProtos.CatalogItem.UNAVAILABLE;
     public final static int DOWNLOADING = CatalogItemProtos.CatalogItem.DOWNLOADING;
-    public static final int ERROR = CatalogItemProtos.CatalogItem.ERROR;
+    public final static int ERROR = CatalogItemProtos.CatalogItem.ERROR;
 
-    public final ObservableField<Book> book = new ObservableField<>();
+    private final static String[] STATUS_STRINGS =
+            {"UNKNOWN", "AVAILABLE", "UNAVAILABLE", "DOWNLOADING", "ERROR"};
 
-    @IntRange(from = 0, to = 100)
-    public final ObservableInt progress = new ObservableInt(0) {
-        @Override
-        public void set(int value) {
-            super.set(value);
+    /** The size, in download "ticks", of this item.
+     *
+     * @see Downloader#MAX_MILLIS_PER_TICK
+     */
+    public final static int TOTAL_NUM_CHUNKS = 300;
 
-            updateStatus();
-        }
-    };
-
-    @ItemStatus
-    public final ObservableInt status = new ObservableInt(UNAVAILABLE);
-
-    private void updateStatus() {
-        if (status.get() == DOWNLOADING && progress.get() >= 100) {
-            status.set(AVAILABLE);
-        }
-    }
-
-    public CatalogItem(Book book, @IntRange(from = 0, to = 100) int progress, @ItemStatus int status) {
-        this.book.set(book);
-        this.progress.set(progress);
-        this.status.set(status);
-    }
+    private final CatalogItemProtos.CatalogItem mProto;
+    private final Book mBook;
 
     public CatalogItem(Book book) {
         this(book, 0, UNAVAILABLE);
     }
 
+    public CatalogItem(Book book, @IntRange(from = 0, to = TOTAL_NUM_CHUNKS) int progress,
+                       @ItemStatus int status) {
+        mBook = book;
+
+        mProto = new CatalogItemProtos.CatalogItem();
+        mProto.downloadProgress = progress;
+        mProto.status = status;
+        mProto.book = book.getProto();
+    }
+
+    public CatalogItem(CatalogItemProtos.CatalogItem proto) {
+        mProto = proto;
+        mBook = new Book(mProto.book);
+    }
+
+    public CatalogItemProtos.CatalogItem getProto() {
+        return mProto;
+    }
+
+    @Override
+    public void addOnPropertyChangedCallback(OnPropertyChangedCallback onPropertyChangedCallback) {
+        mPropertyChangeRegistry.add(onPropertyChangedCallback);
+    }
+
+    @Override
+    public void removeOnPropertyChangedCallback(OnPropertyChangedCallback onPropertyChangedCallback) {
+        mPropertyChangeRegistry.remove(onPropertyChangedCallback);
+    }
+
+    @Bindable
+    public int getDownloadProgress() {
+        return mProto.downloadProgress;
+    }
+
+    @Bindable
+    public Book getBook() {
+        return mBook;
+    }
+
+    @Bindable
+    public int getStatus() {
+        return mProto.status;
+    }
+
     public boolean isDownloading() {
-        return status.get() == DOWNLOADING;
+        return mProto.status == DOWNLOADING;
+    }
+    public boolean isAvailable() {
+        return mProto.status == AVAILABLE;
+    }
+    public boolean isErroring() {
+        return mProto.status == ERROR;
+    }
+
+    @Override
+    public void onItemDownloadIncrementProgress(CatalogItem item) {
+        if (item == this) {
+            setDownloadProgress(mProto.downloadProgress + 1);
+            if (mProto.downloadProgress >= TOTAL_NUM_CHUNKS) {
+                setStatus(AVAILABLE);
+            }
+        }
+    }
+
+    @Override
+    public void onItemDownloadInterrupted(CatalogItem item) {
+        onItemDeleteLocalCopy(item);
+    }
+
+    @Override
+    public void onItemDownloadCancelled(CatalogItem item) {
+        onItemDeleteLocalCopy(item);
+    }
+
+    @Override
+    public void onItemDeleteLocalCopy(CatalogItem item) {
+        if (item == this) {
+            setStatus(UNAVAILABLE);
+            setDownloadProgress(0);
+        }
+    }
+
+    @Override
+    public void onItemDownloadFinished(CatalogItem item) {
+        if (item == this) {
+            item.setStatus(AVAILABLE);
+        }
+    }
+
+    @Override
+    public void onItemDownloadStarted(CatalogItem item) {
+        if (item == this) {
+            item.setStatus(DOWNLOADING);
+        }
+    }
+
+    @Override
+    public void onItemDownloadFailed(CatalogItem item) {
+        if (item == this) {
+            item.setStatus(ERROR);
+        }
+    }
+
+    private void setDownloadProgress(int progress) {
+        mProto.downloadProgress = progress;
+        mPropertyChangeRegistry.notifyChange(this, BR.downloadProgress);
+    }
+
+    private synchronized void setStatus(int newStatus) {
+        int oldStatus = mProto.status;
+        if ((oldStatus == AVAILABLE && newStatus == UNAVAILABLE)
+                || (oldStatus == DOWNLOADING && newStatus == ERROR)
+                || (oldStatus == DOWNLOADING && newStatus == AVAILABLE)
+                || (oldStatus == DOWNLOADING && newStatus == UNAVAILABLE)
+                || (oldStatus == ERROR && newStatus == DOWNLOADING)
+                || (oldStatus == UNAVAILABLE && newStatus == DOWNLOADING)
+                ) {
+
+            Log.v(TAG,
+                    "transitioning from state " + STATUS_STRINGS[oldStatus]
+                    + " to " + STATUS_STRINGS[newStatus]);
+            mProto.status = newStatus;
+
+            mPropertyChangeRegistry.notifyChange(this, BR.status);
+        }
+    }
+
+    @BindingAdapter("catalogIconSource")
+    public static void setCatalogIconSource(ImageButton button, int status) {
+        switch (status) {
+            case AVAILABLE:
+                button.setImageResource(R.drawable.ic_delete);
+                break;
+
+            case UNAVAILABLE:
+                button.setImageResource(R.drawable.ic_download);
+                break;
+
+            case DOWNLOADING:
+                button.setImageResource(R.drawable.ic_cancel);
+                break;
+
+            case ERROR:
+                button.setImageResource(R.drawable.ic_error);
+                break;
+
+            default:
+                button.setImageResource(android.R.drawable.ic_dialog_alert);
+                break;
+        }
     }
 }

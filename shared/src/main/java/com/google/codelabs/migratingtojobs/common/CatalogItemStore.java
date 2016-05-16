@@ -16,6 +16,7 @@
 
 package com.google.codelabs.migratingtojobs.common;
 
+import android.databinding.Observable;
 import android.support.annotation.NonNull;
 
 import com.google.codelabs.migratingtojobs.common.nano.CatalogItemProtos;
@@ -25,42 +26,73 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CatalogItemStore {
+    interface ChangeListener {
+        void onStoreDidChange();
+    }
+
+    private final List<ChangeListener> mChangeListeners = new LinkedList<>();
+    private final Observable.OnPropertyChangedCallback mPropertyChangedCallback =
+            new Observable.OnPropertyChangedCallback() {
+                @Override
+                public void onPropertyChanged(Observable observable, int i) {
+                    notifyItemDidChange(observable);
+                }
+            };
+
+    private final CatalogItemProtos.CatalogItemStore mProto;
+
     private interface Predicate<T> {
         boolean apply(T item);
     }
 
-    private final List<CatalogItem> mItems;
+    private final CatalogItem[] mItems;
 
     private Predicate<CatalogItem> mPredicateIsDownloading = new Predicate<CatalogItem>() {
         @Override
         public boolean apply(CatalogItem item) {
-            return item.isDownloading();
+            return item.isErroring() || item.isDownloading();
         }
     };
 
-    public CatalogItemStore(@NonNull List<CatalogItem> items) {
+    public CatalogItemStore(@NonNull CatalogItem[] items) {
+        mProto = new CatalogItemProtos.CatalogItemStore();
         mItems = items;
+
+        mProto.items = new CatalogItemProtos.CatalogItem[mItems.length];
+        for (int i = 0; i < mItems.length; i++) {
+            mProto.items[i] = mItems[i].getProto();
+            mItems[i].addOnPropertyChangedCallback(mPropertyChangedCallback);
+        }
     }
 
     public CatalogItemStore(@NonNull CatalogItemProtos.CatalogItemStore protoStore) {
-        mItems = new LinkedList<>();
-        for (CatalogItemProtos.CatalogItem item : protoStore.items) {
-            CatalogItemProtos.Book protoBook = item.book;
+        mProto = protoStore;
 
-            //noinspection WrongConstant
-            mItems.add(
-                    new CatalogItem(
-                            new Book(protoBook.title, protoBook.author),
-                            item.downloadProgress,
-                            item.status));
+        mItems = new CatalogItem[mProto.items.length];
+        for (int i = 0; i < mProto.items.length; i++) {
+            mItems[i] = new CatalogItem(mProto.items[i]);
+            mItems[i].addOnPropertyChangedCallback(mPropertyChangedCallback);
         }
     }
+
+    public void addChangeListener(ChangeListener changeListener) {
+        mChangeListeners.add(changeListener);
+    }
+    public void removeChangeListener(ChangeListener changeListener) {
+        mChangeListeners.remove(changeListener);
+    }
+    private void notifyItemDidChange(Observable observable) {
+        for (ChangeListener listener : mChangeListeners) {
+            listener.onStoreDidChange();
+        }
+    }
+
     public CatalogItem get(int position) {
-        return mItems.get(position);
+        return mItems[position];
     }
 
     public int size() {
-        return mItems.size();
+        return mItems.length;
     }
 
     @NonNull
@@ -69,27 +101,7 @@ public class CatalogItemStore {
     }
 
     public byte[] toProtoBytes() {
-        CatalogItemProtos.CatalogItemStore store = new CatalogItemProtos.CatalogItemStore();
-        store.items = new CatalogItemProtos.CatalogItem[mItems.size()];
-
-        for (int i = 0; i < store.items.length; i++) {
-            CatalogItem item = mItems.get(i);
-            Book book = item.book.get();
-
-            CatalogItemProtos.CatalogItem protoItem = new CatalogItemProtos.CatalogItem();
-            CatalogItemProtos.Book protoBook = new CatalogItemProtos.Book();
-
-            protoBook.title = book.title;
-            protoBook.author = book.author;
-
-            protoItem.book = protoBook;
-            protoItem.downloadProgress = item.progress.get();
-            protoItem.status = item.status.get();
-
-            store.items[i] = protoItem;
-        }
-
-        return MessageNano.toByteArray(store);
+        return MessageNano.toByteArray(mProto);
     }
 
     private List<CatalogItem> filter(Predicate<CatalogItem> predicate) {

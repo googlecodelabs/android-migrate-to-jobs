@@ -18,94 +18,155 @@ package com.google.codelabs.migratingtojobs.common;
 
 import android.net.ConnectivityManager;
 import android.support.v4.util.SimpleArrayMap;
+import android.util.Log;
 
-import java.util.concurrent.Callable;
+import java.util.Locale;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Downloader is responsible for simulating download requests. No actual HTTP requests are made.
  */
 public class Downloader {
-    public static final int FAILURE = 1;
-    public static final int SUCCESS = 2;
+    public static final int SUCCESS = 0;
+    public static final int ERROR = 1;
+
+    public static final String TAG = "Downloader";
+
+    /** @see CatalogItem#TOTAL_NUM_CHUNKS */
+    private static final int MAX_MILLIS_PER_TICK = 28;
 
     private final ExecutorService mExecutorService;
     private final ConnectivityManager mConnManager;
-    private final SimpleArrayMap<CatalogItem, Future<Integer>> mMap = new SimpleArrayMap<>();
+    private final Random mRandom;
+    private final EventBus mBus;
+    private final SimpleArrayMap<CatalogItem, Future<?>> mMap = new SimpleArrayMap<>();
+    public final EventBus.EventListener eventListener = new DownloaderEventListener();
 
-    public Downloader(ExecutorService executorService, ConnectivityManager connManager) {
+    @Inject
+    public Downloader(@Named("worker") ExecutorService executorService,
+                      ConnectivityManager connManager, Random random, EventBus eventBus) {
         mExecutorService = executorService;
         mConnManager = connManager;
+        mRandom = random;
+        mBus = eventBus;
     }
 
-    /** Start downloading the provided CatalogItem. */
-    public Future<Integer> start(final CatalogItem item, OnCompleteCallback callback) {
-        Future<Integer> future = mMap.get(item);
-        if (future != null) {
+    /**
+     * Start downloading the provided CatalogItem.
+     */
+    private Future<?> start(final CatalogItem item) {
+        synchronized (mMap) {
+            Future<?> future = mMap.get(item);
+            if (future != null) {
+                Log.v(TAG, "found pending future for " + item.getBook().getTitle());
+                return future;
+            }
+
+            future = mExecutorService.submit(new DownloadRunner(item, mBus, mRandom, mConnManager));
+            mMap.put(item, future);
             return future;
         }
-
-        future = mExecutorService.submit(new DownloadRunner(item, callback));
-        mMap.put(item, future);
-        return future;
     }
 
-    /** Stop downloading the provided CatalogItem. */
-    public void stop(final CatalogItem item) {
-        Future<Integer> future = mMap.remove(item);
-        if (future != null) {
-            future.cancel(true);
+    /**
+     * Stop downloading the provided CatalogItem.
+     */
+    private void stop(final CatalogItem item) {
+        synchronized (mMap) {
+            Future<?> future = mMap.remove(item);
+            if (future != null) {
+                future.cancel(true);
+            }
         }
     }
 
-    public interface OnCompleteCallback {
-        void onComplete(CatalogItem item, int status);
-    }
+    private static class DownloadRunner implements Runnable {
+        private final CatalogItem item;
+        private final EventBus bus;
+        private final Random random;
+        private final ConnectivityManager connectivityManager;
 
-    private class DownloadRunner implements Callable<Integer> {
-        private final CatalogItem mItem;
-        private final OnCompleteCallback mCallback;
-
-        public DownloadRunner(CatalogItem item, OnCompleteCallback callback) {
-            mItem = item;
-            mCallback = callback;
+        public DownloadRunner(CatalogItem item, EventBus bus, Random random,
+                              ConnectivityManager connectivityManager) {
+            this.item = item;
+            this.bus = bus;
+            this.random = random;
+            this.connectivityManager = connectivityManager;
         }
 
-        public int run() throws Exception {
-            for (int i = 1 + mItem.progress.get(); i <= 100; i++) {
-                if (!Util.isNetworkActive(Downloader.this.mConnManager)) {
-                    // simulate a network failure
-                    return FAILURE;
+        public int attemptDownload() throws InterruptedException {
+            while (!item.isAvailable()) {
+                if (!Util.isNetworkActive(connectivityManager)) {
+                    // simulate an error if the network is down
+                    return ERROR;
                 }
 
-                mItem.progress.set(i);
-                Thread.sleep(100);
+                Thread.sleep(random.nextInt(MAX_MILLIS_PER_TICK));
+                bus.postItemDownloadIncrementProgress(item);
             }
 
-            if (mItem.progress.get() >= 100) {
-                return SUCCESS;
-            }
+            return SUCCESS;
+        }
 
-            mItem.status.set(CatalogItem.ERROR);
-            return FAILURE;
+        public void run() {
+            Log.i(TAG, String.format(Locale.US, "starting to download \"%s\"",
+                    item.getBook().getTitle()));
+
+            try {
+                if (attemptDownload() == ERROR) {
+                    bus.postItemDownloadFailed(item);
+                } else {
+                    bus.postItemDownloadFinished(item);
+                }
+            } catch (InterruptedException e) {
+                bus.postItemDownloadInterrupted(item);
+            }
+        }
+    }
+
+    private class DownloaderEventListener extends BaseEventListener {
+        @Override
+        public void onItemDownloadStarted(CatalogItem item) {
+            Log.v(TAG, "starting to download " + item.getBook().getTitle());
+            start(item);
         }
 
         @Override
-        public Integer call() throws Exception {
-            Integer result = null;
+        public void onItemDownloadCancelled(CatalogItem item) {
+            stop(item);
+        }
 
-            try {
-                result = run();
-            } finally {
-                mMap.remove(mItem);
+        @Override
+        public void onItemDownloadFailed(CatalogItem item) {
+            synchronized (mMap) {
+                mMap.remove(item);
+            }
+        }
 
-                if (mCallback != null) {
-                    mCallback.onComplete(mItem, result);
+        @Override
+        public void onItemDownloadFinished(CatalogItem item) {
+            synchronized (mMap) {
+                mMap.remove(item);
+
+                if (mMap.size() == 0) {
+                    mBus.postAllDownloadsFinished();
                 }
             }
+        }
 
-            return result;
+        @Override
+        public void onRetryDownloads(CatalogItemStore store) {
+            Log.v(TAG, "retrying downloads");
+
+            for (CatalogItem item : store.getDownloadQueue()) {
+                Log.v(TAG, "posting start for " + item.getBook().getTitle());
+                mBus.postItemDownloadStarted(item);
+            }
         }
     }
 }

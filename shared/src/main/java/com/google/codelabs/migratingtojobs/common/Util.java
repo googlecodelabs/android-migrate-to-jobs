@@ -25,6 +25,6 @@ public final class Util {
     public static boolean isNetworkActive(ConnectivityManager connManager) {
         NetworkInfo netInfo = connManager.getActiveNetworkInfo();
 
-        return netInfo != null && netInfo.isConnectedOrConnecting();
+        return netInfo != null && netInfo.isConnected() && netInfo.isAvailable();
     }
 }

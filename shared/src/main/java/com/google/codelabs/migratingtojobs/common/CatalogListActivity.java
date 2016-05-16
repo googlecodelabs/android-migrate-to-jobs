@@ -25,42 +25,53 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
-public class CatalogListActivity extends AppCompatActivity {
+import javax.inject.Inject;
 
-    private RecyclerView mCatalogList;
+public abstract class CatalogListActivity extends AppCompatActivity {
+    @Inject
+    CatalogRecyclerAdaptor mAdaptor;
 
-    private CatalogRecyclerAdaptor mAdaptor;
-    private BasicBrain mBrain;
+    @Inject
+    EventBus mBus;
+
+    /* @BindView(R.id.catalog_list) */ RecyclerView mCatalogList;
+
+    protected void inject() {
+        DaggerRootComponent.builder()
+                .appModule(new AppModule(getApplication()))
+                .build()
+                .inject(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_catalog_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+
+        inject();
+
+        mBus.postActivityCreated();
 
         mCatalogList = (RecyclerView) findViewById(R.id.catalog_list);
         mCatalogList.setLayoutManager(new LinearLayoutManager(this));
-
-        BasicApp app = ((BasicApp) getApplication());
-        mAdaptor = new CatalogRecyclerAdaptor(app.getCatalogStore());
-        mBrain = app.getBrain();
-
         mCatalogList.setAdapter(mAdaptor);
         mCatalogList.addOnItemTouchListener(new OnCatalogItemTouchListener());
     }
 
     @Override
-    protected void onPause() {
-        ((BasicApp) getApplication()).writeCatalogItems();
-        super.onPause();
+    protected void onDestroy() {
+        mBus.postActivityDestroyed();
+
+        super.onDestroy();
     }
 
     private class OnCatalogItemTouchListener implements RecyclerView.OnItemTouchListener {
-        private final GestureDetector mGestueDetector;
+        private final GestureDetector mGestureDetector;
 
         public OnCatalogItemTouchListener() {
-            mGestueDetector = new GestureDetector(getBaseContext(), new GestureDetector.SimpleOnGestureListener() {
+            mGestureDetector = new GestureDetector(getBaseContext(), new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onSingleTapUp(MotionEvent me) {
                     return true;
@@ -71,8 +82,16 @@ public class CatalogListActivity extends AppCompatActivity {
         @Override
         public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
             View target = rv.findChildViewUnder(e.getX(), e.getY());
-            if (target != null && mGestueDetector.onTouchEvent(e)) {
-                mBrain.didClickOn(mAdaptor.getStore().get(rv.getChildAdapterPosition(target)));
+            if (target != null && mGestureDetector.onTouchEvent(e)) {
+                CatalogItem item = mAdaptor.getStore().get(rv.getChildAdapterPosition(target));
+
+                if (item.isAvailable()) {
+                    mBus.postItemDeleteLocalCopy(item);
+                } else if (item.isDownloading()) {
+                    mBus.postItemDownloadCancelled(item);
+                } else {
+                    mBus.postItemDownloadStarted(item);
+                }
 
                 return true;
             }

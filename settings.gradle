@@ -1,1 +1,1 @@
-include ':original_app', ':shared', ':jobdownloads'
+include ':original_app', ':shared', ':jobscheduler'

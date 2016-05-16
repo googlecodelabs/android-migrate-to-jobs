@@ -1,4 +1,6 @@
+//noinspection GradleCompatible
 apply plugin: 'com.android.library'
+apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.google.protobuf'
 
 protobuf {
@@ -29,9 +31,16 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.+'
+    compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
     compile 'com.google.protobuf.nano:protobuf-javanano:3.0.0-alpha-2'
+
+    // https://github.com/google/dagger/issues/356
+    apt 'com.google.guava:guava:19.0'
+    compile 'com.google.dagger:dagger:2.2'
+    apt 'com.google.dagger:dagger-compiler:2.2'
+    provided 'javax.annotation:jsr250-api:1.0'
+
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
 }

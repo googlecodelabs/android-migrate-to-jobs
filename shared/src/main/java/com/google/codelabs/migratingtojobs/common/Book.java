@@ -16,12 +16,30 @@
 
 package com.google.codelabs.migratingtojobs.common;
 
+import com.google.codelabs.migratingtojobs.common.nano.CatalogItemProtos;
+
 public class Book {
-    public String title;
-    public String author;
+    private final CatalogItemProtos.Book mProto;
 
     public Book(String title, String author) {
-        this.title = title;
-        this.author = author;
+        mProto = new CatalogItemProtos.Book();
+        mProto.title = title;
+        mProto.author = author;
+    }
+
+    public Book(CatalogItemProtos.Book proto) {
+        mProto = proto;
+    }
+
+    public CatalogItemProtos.Book getProto() {
+        return mProto;
+    }
+
+    public String getTitle() {
+        return mProto.title;
+    }
+
+    public String getAuthor() {
+        return mProto.author;
     }
 }

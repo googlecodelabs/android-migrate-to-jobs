@@ -24,23 +24,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.codelabs.migratingtojobs.common.BR;
-import com.google.codelabs.migratingtojobs.common.R;
+import javax.inject.Inject;
 
 public class CatalogRecyclerAdaptor extends RecyclerView.Adapter<CatalogRecyclerAdaptor.Holder> {
-    private CatalogItemStore mItems;
+    private final CatalogItemStore mStore;
 
+    @Inject
     public CatalogRecyclerAdaptor(@NonNull CatalogItemStore items) {
-        mItems = items;
+        mStore = items;
     }
 
     public CatalogItemStore getStore() {
-        return mItems;
+        return mStore;
     }
 
     @Override
     public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
+        View v = LayoutInflater
+                .from(parent.getContext())
                 .inflate(R.layout.content_catalog_item, parent, false);
 
         return new Holder(v);
@@ -48,7 +49,7 @@ public class CatalogRecyclerAdaptor extends RecyclerView.Adapter<CatalogRecycler
 
     @Override
     public void onBindViewHolder(Holder holder, int position) {
-        CatalogItem item = mItems.get(position);
+        CatalogItem item = mStore.get(position);
         holder.getBinding().setVariable(BR.item, item);
 
         // trigger queued bindings early (as opposed to next animation frame)
@@ -57,7 +58,7 @@ public class CatalogRecyclerAdaptor extends RecyclerView.Adapter<CatalogRecycler
 
     @Override
     public int getItemCount() {
-        return mItems.size();
+        return mStore.size();
     }
 
     public class Holder extends RecyclerView.ViewHolder {
