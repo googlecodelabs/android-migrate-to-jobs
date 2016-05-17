@@ -2,10 +2,10 @@ package com.google.codelabs.migratingtojobs.original_app;
 
 import android.content.Context;
 
-import com.google.codelabs.migratingtojobs.common.AppModule;
-import com.google.codelabs.migratingtojobs.common.ErrorLoggingDownloadCallback;
-import com.google.codelabs.migratingtojobs.common.EventBus;
-import com.google.codelabs.migratingtojobs.common.SharedInitializer;
+import com.google.codelabs.migratingtojobs.shared.AppModule;
+import com.google.codelabs.migratingtojobs.shared.ErrorLoggingDownloadCallback;
+import com.google.codelabs.migratingtojobs.shared.EventBus;
+import com.google.codelabs.migratingtojobs.shared.SharedInitializer;
 
 import javax.inject.Inject;
 

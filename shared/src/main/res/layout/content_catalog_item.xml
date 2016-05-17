@@ -6,7 +6,7 @@
 
         <import type="android.view.View" />
 
-        <import type="com.google.codelabs.migratingtojobs.common.CatalogItem" />
+        <import type="com.google.codelabs.migratingtojobs.shared.CatalogItem" />
 
         <variable
             name="item"

@@ -14,31 +14,32 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-syntax = "proto3";
+package com.google.codelabs.migratingtojobs.shared;
 
-package schema;
+import com.google.codelabs.migratingtojobs.shared.nano.CatalogItemProtos;
 
-option java_package = "com.google.codelabs.migratingtojobs.shared";
-option java_outer_classname = "CatalogItemProtos";
+public class Book {
+    private final CatalogItemProtos.Book mProto;
 
-message Book {
-    string title = 1;
-    string author = 2;
-}
-
-message CatalogItem {
-    Book book = 1;
-    int32 downloadProgress = 2;
-    enum Status {
-        UNKNOWN = 0;
-        AVAILABLE = 1;
-        UNAVAILABLE = 2;
-        DOWNLOADING = 3;
-        ERROR = 4;
+    public Book(String title, String author) {
+        mProto = new CatalogItemProtos.Book();
+        mProto.title = title;
+        mProto.author = author;
     }
-    Status status = 3;
-}
 
-message CatalogItemStore {
-    repeated CatalogItem items = 1;
+    public Book(CatalogItemProtos.Book proto) {
+        mProto = proto;
+    }
+
+    public CatalogItemProtos.Book getProto() {
+        return mProto;
+    }
+
+    public String getTitle() {
+        return mProto.title;
+    }
+
+    public String getAuthor() {
+        return mProto.author;
+    }
 }

@@ -1,19 +1,12 @@
-//noinspection GradleCompatible
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
-apply plugin: 'com.google.protobuf'
-
-protobuf {
-    protoc {
-        artifact = 'com.google.protobuf:protoc:3.0.0-beta-2'
-    }
-}
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.3'
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
+        applicationId "com.google.codelabs.migratingtojobs.jobdispatcher_complete"
         minSdkVersion 21
         targetSdkVersion 23
         versionCode 1
@@ -31,14 +24,15 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile 'com.android.support:design:23.3.0'
-    compile 'com.google.protobuf.nano:protobuf-javanano:3.0.0-alpha-2'
-    // https://github.com/google/dagger/issues/356
-    apt 'com.google.guava:guava:19.0'
-    compile 'com.google.dagger:dagger:2.2'
-    apt 'com.google.dagger:dagger-compiler:2.2'
-    provided 'javax.annotation:jsr250-api:1.0'
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:design:23.3.0'
+    // https://github.com/google/dagger/issues/356
+    apt 'com.google.guava:guava:19.0'
+    compile 'com.google.dagger:dagger:2.4'
+    apt 'com.google.dagger:dagger-compiler:2.4'
+    provided 'javax.annotation:jsr250-api:1.0'
+    compile project(':shared')
+    compile project(':firebase-jobdispatcher')
 }

@@ -1,6 +1,6 @@
 package com.google.codelabs.migratingtojobs.original_app;
 
-import com.google.codelabs.migratingtojobs.common.CatalogListActivity;
+import com.google.codelabs.migratingtojobs.shared.CatalogListActivity;
 
 public class ErrorLoggingCatalogListActivity extends CatalogListActivity {
     @Override

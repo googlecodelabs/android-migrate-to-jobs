@@ -14,31 +14,18 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-syntax = "proto3";
+package com.google.codelabs.migratingtojobs.shared;
 
-package schema;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
-option java_package = "com.google.codelabs.migratingtojobs.shared";
-option java_outer_classname = "CatalogItemProtos";
-
-message Book {
-    string title = 1;
-    string author = 2;
-}
-
-message CatalogItem {
-    Book book = 1;
-    int32 downloadProgress = 2;
-    enum Status {
-        UNKNOWN = 0;
-        AVAILABLE = 1;
-        UNAVAILABLE = 2;
-        DOWNLOADING = 3;
-        ERROR = 4;
+public final class Util {
+    private Util() {
     }
-    Status status = 3;
-}
 
-message CatalogItemStore {
-    repeated CatalogItem items = 1;
+    public static boolean isNetworkActive(ConnectivityManager connManager) {
+        NetworkInfo netInfo = connManager.getActiveNetworkInfo();
+
+        return netInfo != null && netInfo.isConnected() && netInfo.isAvailable();
+    }
 }

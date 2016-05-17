@@ -22,8 +22,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.text.TextUtils;
 
-import com.google.codelabs.migratingtojobs.common.CatalogItemStore;
-import com.google.codelabs.migratingtojobs.common.EventBus;
+import com.google.codelabs.migratingtojobs.shared.CatalogItemStore;
+import com.google.codelabs.migratingtojobs.shared.EventBus;
 
 import javax.inject.Inject;
 

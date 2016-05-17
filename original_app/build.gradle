@@ -25,17 +25,13 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
-
     // https://github.com/google/dagger/issues/356
     apt 'com.google.guava:guava:19.0'
     apt 'com.google.dagger:dagger-compiler:2.4'
     compile 'com.google.dagger:dagger:2.4'
     provided 'javax.annotation:jsr250-api:1.0'
-
     testCompile 'junit:junit:4.12'
-
     compile project(':shared')
 }

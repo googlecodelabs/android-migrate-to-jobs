@@ -1,7 +1,7 @@
 package com.google.codelabs.migratingtojobs.original_app;
 
-import com.google.codelabs.migratingtojobs.common.AppModule;
-import com.google.codelabs.migratingtojobs.common.RootComponent;
+import com.google.codelabs.migratingtojobs.shared.AppModule;
+import com.google.codelabs.migratingtojobs.shared.RootComponent;
 
 import javax.inject.Singleton;
 

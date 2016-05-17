@@ -1,1 +1,1 @@
-include ':original_app', ':shared', ':jobscheduler'
+include ':original_app', ':shared', ':jobscheduler_complete', ':jobdispatcher_complete', ':firebase-jobdispatcher'
