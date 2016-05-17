@@ -37,12 +37,45 @@ public class JobSchedulingErrorListener extends BaseEventListener {
     private static final String TAG = "JS D/L Handler";
 
     private final ExecutorService executorService;
-
+    /**
+     * All calls to the JobScheduler go through IPC, so we do it all on a worker thread in this
+     * Runnable.
+     */
+    private final Runnable scheduleRunnable;
     /**
      * Whether we've already scheduled a job. We should avoid making too many expensive IPC calls,
      * so check this (synchronize on this) first.
      */
     private boolean jobScheduled = false;
+
+    @Inject
+    public JobSchedulingErrorListener(@NonNull Context appContext,
+                                      @Named("worker") ExecutorService executorService) {
+        scheduleRunnable = new ScheduleRunnable(appContext);
+        this.executorService = executorService;
+    }
+
+    @Override
+    public void onItemDownloadFailed(CatalogItem item) {
+        // most checks shouldn't have to wait for the synch lock
+        if (!jobScheduled) {
+            synchronized (this) {
+                if (!jobScheduled) {
+                    executorService.submit(scheduleRunnable);
+                    jobScheduled = true;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void handle(int what) {
+        if (what == JobSchedulerEvents.DOWNLOAD_JOB_FINISHED) {
+            synchronized (this) {
+                jobScheduled = false;
+            }
+        }
+    }
 
     private static class ScheduleRunnable implements Runnable {
         private final Context appContext;
@@ -74,41 +107,6 @@ public class JobSchedulingErrorListener extends BaseEventListener {
                 Log.e(TAG, "encountered unknown error scheduling job");
             }
 
-        }
-    }
-
-    /**
-     * All calls to the JobScheduler go through IPC, so we do it all on a worker thread in this
-     * Runnable.
-     */
-    private final Runnable scheduleRunnable;
-
-    @Inject
-    public JobSchedulingErrorListener(@NonNull Context appContext,
-                                      @Named("worker") ExecutorService executorService) {
-        scheduleRunnable = new ScheduleRunnable(appContext);
-        this.executorService = executorService;
-    }
-
-    @Override
-    public void onItemDownloadFailed(CatalogItem item) {
-        // most checks shouldn't have to wait for the synch lock
-        if (!jobScheduled) {
-            synchronized (this) {
-                if (!jobScheduled) {
-                    executorService.submit(scheduleRunnable);
-                    jobScheduled = true;
-                }
-            }
-        }
-    }
-
-    @Override
-    public void handle(int what) {
-        if (what == JobSchedulerEvents.DOWNLOAD_JOB_FINISHED) {
-            synchronized (this) {
-                jobScheduled = false;
-            }
         }
     }
 }

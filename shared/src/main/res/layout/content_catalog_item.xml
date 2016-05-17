@@ -3,10 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <import type="android.view.View"/>
-        <import type="com.google.codelabs.migratingtojobs.common.CatalogItem"/>
 
-        <variable name="item" type="CatalogItem" />
+        <import type="android.view.View" />
+
+        <import type="com.google.codelabs.migratingtojobs.common.CatalogItem" />
+
+        <variable
+            name="item"
+            type="CatalogItem" />
     </data>
 
     <LinearLayout
@@ -15,9 +19,9 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:background="?attr/selectableItemBackground"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:background="?attr/selectableItemBackground"
             android:contentDescription="Download book"
             app:catalogIconSource="@{item.status}" />
 
@@ -30,33 +34,32 @@
             android:orientation="vertical">
 
             <TextView
-                android:textColor="@{item.status == CatalogItem.AVAILABLE ? @android:color/black : @android:color/tertiary_text_light}"
-                android:textAppearance="?android:attr/textAppearanceLarge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{item.book.title}" />
+                android:text="@{item.book.title}"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@{item.status == CatalogItem.AVAILABLE ? @android:color/black : @android:color/tertiary_text_light}" />
 
             <!--
                 android:textColor=""
             -->
             <TextView
-                android:textColor="@{item.status == CatalogItem.AVAILABLE ? @android:color/black : @android:color/tertiary_text_light}"
-                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{item.book.author}" />
+                android:text="@{item.book.author}"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@{item.status == CatalogItem.AVAILABLE ? @android:color/black : @android:color/tertiary_text_light}" />
 
             <ProgressBar
                 style="@android:style/Widget.Holo.Light.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="@{item.status == CatalogItem.DOWNLOADING ? View.VISIBLE : View.INVISIBLE}"
+                android:backgroundTint="@android:color/holo_purple"
                 android:max="@{CatalogItem.TOTAL_NUM_CHUNKS}"
                 android:progress="@{item.downloadProgress}"
-                android:backgroundTint="@android:color/holo_purple"
-                android:progressTint="@android:color/holo_blue_light"
                 android:progressBackgroundTint="@android:color/transparent"
-                />
+                android:progressTint="@android:color/holo_blue_light"
+                android:visibility="@{item.status == CatalogItem.DOWNLOADING ? View.VISIBLE : View.INVISIBLE}" />
         </LinearLayout>
 
 

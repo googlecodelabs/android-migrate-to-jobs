@@ -11,6 +11,8 @@ import dagger.Component;
 @Component(modules = {AppModule.class})
 public interface JobSchedulerComponent extends RootComponent {
     void inject(JobSchedulerGlobalState jobSchedulerGlobalState);
+
     void inject(JobSchedulingCatalogListActivity activity);
+
     void inject(DownloaderJobService jobService);
 }

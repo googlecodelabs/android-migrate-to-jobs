@@ -26,10 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CatalogItemStore {
-    interface ChangeListener {
-        void onStoreDidChange();
-    }
-
     private final List<ChangeListener> mChangeListeners = new LinkedList<>();
     private final Observable.OnPropertyChangedCallback mPropertyChangedCallback =
             new Observable.OnPropertyChangedCallback() {
@@ -38,15 +34,8 @@ public class CatalogItemStore {
                     notifyItemDidChange(observable);
                 }
             };
-
     private final CatalogItemProtos.CatalogItemStore mProto;
-
-    private interface Predicate<T> {
-        boolean apply(T item);
-    }
-
     private final CatalogItem[] mItems;
-
     private Predicate<CatalogItem> mPredicateIsDownloading = new Predicate<CatalogItem>() {
         @Override
         public boolean apply(CatalogItem item) {
@@ -78,9 +67,11 @@ public class CatalogItemStore {
     public void addChangeListener(ChangeListener changeListener) {
         mChangeListeners.add(changeListener);
     }
+
     public void removeChangeListener(ChangeListener changeListener) {
         mChangeListeners.remove(changeListener);
     }
+
     private void notifyItemDidChange(Observable observable) {
         for (ChangeListener listener : mChangeListeners) {
             listener.onStoreDidChange();
@@ -113,5 +104,13 @@ public class CatalogItemStore {
         }
 
         return newList;
+    }
+
+    interface ChangeListener {
+        void onStoreDidChange();
+    }
+
+    private interface Predicate<T> {
+        boolean apply(T item);
     }
 }

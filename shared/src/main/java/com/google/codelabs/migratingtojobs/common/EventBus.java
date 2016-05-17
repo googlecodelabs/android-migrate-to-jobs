@@ -5,43 +5,12 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.util.SparseArray;
-
-import com.squareup.otto.Bus;
-import com.squareup.otto.ThreadEnforcer;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class EventBus {
-    public interface EventListener {
-        void handle(int what);
-
-        void onInit(CatalogItemStore itemStore);
-
-        void onActivityCreated();
-
-        void onActivityDestroyed();
-
-        void onItemDownloadFailed(CatalogItem item);
-
-        void onItemDownloadStarted(CatalogItem item);
-
-        void onItemDownloadFinished(CatalogItem item);
-
-        void onItemDownloadCancelled(CatalogItem item);
-
-        void onItemDownloadInterrupted(CatalogItem item);
-
-        void onItemDownloadIncrementProgress(CatalogItem item);
-
-        void onItemDeleteLocalCopy(CatalogItem item);
-
-        void onAllDownloadsFinished();
-
-        void onRetryDownloads(CatalogItemStore itemStore);
-    }
-
+    public static final int FIRST_UNUSED = 14;
     private static final int INIT = 1;
     private static final int ACTIVITY_CREATED = 1 << 1;
     private static final int ACTIVITY_DESTROYED = 1 << 2;
@@ -56,9 +25,6 @@ public class EventBus {
     private static final int UNREGISTER = 1 << 11;
     private static final int ALL_DOWNLOADS_FINISHED = 1 << 12;
     private static final int RETRY_DOWNLOADS = 1 << 13;
-
-    public static final int FIRST_UNUSED = 14;
-
     private final EventBusHandler handler;
 
     public EventBus(Looper looper) {
@@ -132,6 +98,34 @@ public class EventBus {
 
     public void postItemDeleteLocalCopy(CatalogItem item) {
         send(ITEM_DELETE_LOCAL_COPY, item);
+    }
+
+    public interface EventListener {
+        void handle(int what);
+
+        void onInit(CatalogItemStore itemStore);
+
+        void onActivityCreated();
+
+        void onActivityDestroyed();
+
+        void onItemDownloadFailed(CatalogItem item);
+
+        void onItemDownloadStarted(CatalogItem item);
+
+        void onItemDownloadFinished(CatalogItem item);
+
+        void onItemDownloadCancelled(CatalogItem item);
+
+        void onItemDownloadInterrupted(CatalogItem item);
+
+        void onItemDownloadIncrementProgress(CatalogItem item);
+
+        void onItemDeleteLocalCopy(CatalogItem item);
+
+        void onAllDownloadsFinished();
+
+        void onRetryDownloads(CatalogItemStore itemStore);
     }
 
     public static class MultiplexingEventListener implements EventListener {

@@ -1,11 +1,5 @@
 package com.google.codelabs.migratingtojobs.common;
 
-import android.util.Log;
-
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
-
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 

@@ -9,8 +9,11 @@ public class Events {
         }
     }
 
-    public static class ActivityCreatedEvent {}
-    public static class ActivityDestroyedEvent {}
+    public static class ActivityCreatedEvent {
+    }
+
+    public static class ActivityDestroyedEvent {
+    }
 
     public static class DownloadErrorEvent extends CatalogItemEvent {
         public DownloadErrorEvent(CatalogItem item) {
@@ -48,7 +51,7 @@ public class Events {
         }
     }
 
-    public static class DeleteLocalCopyEvent extends CatalogItemEvent{
+    public static class DeleteLocalCopyEvent extends CatalogItemEvent {
         public DeleteLocalCopyEvent(CatalogItem item) {
             super(item);
         }

@@ -37,15 +37,16 @@ public class Downloader {
 
     public static final String TAG = "Downloader";
 
-    /** @see CatalogItem#TOTAL_NUM_CHUNKS */
+    /**
+     * @see CatalogItem#TOTAL_NUM_CHUNKS
+     */
     private static final int MAX_MILLIS_PER_TICK = 28;
-
+    public final EventBus.EventListener eventListener = new DownloaderEventListener();
     private final ExecutorService mExecutorService;
     private final ConnectivityManager mConnManager;
     private final Random mRandom;
     private final EventBus mBus;
     private final SimpleArrayMap<CatalogItem, Future<?>> mMap = new SimpleArrayMap<>();
-    public final EventBus.EventListener eventListener = new DownloaderEventListener();
 
     @Inject
     public Downloader(@Named("worker") ExecutorService executorService,

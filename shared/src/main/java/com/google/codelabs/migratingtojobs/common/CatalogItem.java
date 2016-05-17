@@ -24,7 +24,6 @@ import android.support.annotation.IntDef;
 import android.support.annotation.IntRange;
 import android.util.Log;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import com.google.codelabs.migratingtojobs.common.nano.CatalogItemProtos;
 
@@ -32,28 +31,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public class CatalogItem extends BaseEventListener implements Observable {
-    private static final String TAG = "CatalogItem";
-
-    private final PropertyChangeRegistry mPropertyChangeRegistry = new PropertyChangeRegistry();
-
-    @IntDef({AVAILABLE, UNAVAILABLE, DOWNLOADING, ERROR})
-    @Retention(RetentionPolicy.SOURCE)
-    @interface ItemStatus {}
-
     public final static int AVAILABLE = CatalogItemProtos.CatalogItem.AVAILABLE;
     public final static int UNAVAILABLE = CatalogItemProtos.CatalogItem.UNAVAILABLE;
     public final static int DOWNLOADING = CatalogItemProtos.CatalogItem.DOWNLOADING;
     public final static int ERROR = CatalogItemProtos.CatalogItem.ERROR;
-
-    private final static String[] STATUS_STRINGS =
-            {"UNKNOWN", "AVAILABLE", "UNAVAILABLE", "DOWNLOADING", "ERROR"};
-
-    /** The size, in download "ticks", of this item.
+    /**
+     * The size, in download "ticks", of this item.
      *
      * @see Downloader#MAX_MILLIS_PER_TICK
      */
     public final static int TOTAL_NUM_CHUNKS = 300;
-
+    private static final String TAG = "CatalogItem";
+    private final static String[] STATUS_STRINGS =
+            {"UNKNOWN", "AVAILABLE", "UNAVAILABLE", "DOWNLOADING", "ERROR"};
+    private final PropertyChangeRegistry mPropertyChangeRegistry = new PropertyChangeRegistry();
     private final CatalogItemProtos.CatalogItem mProto;
     private final Book mBook;
 
@@ -76,6 +67,31 @@ public class CatalogItem extends BaseEventListener implements Observable {
         mBook = new Book(mProto.book);
     }
 
+    @BindingAdapter("catalogIconSource")
+    public static void setCatalogIconSource(ImageButton button, int status) {
+        switch (status) {
+            case AVAILABLE:
+                button.setImageResource(R.drawable.ic_delete);
+                break;
+
+            case UNAVAILABLE:
+                button.setImageResource(R.drawable.ic_download);
+                break;
+
+            case DOWNLOADING:
+                button.setImageResource(R.drawable.ic_cancel);
+                break;
+
+            case ERROR:
+                button.setImageResource(R.drawable.ic_error);
+                break;
+
+            default:
+                button.setImageResource(android.R.drawable.ic_dialog_alert);
+                break;
+        }
+    }
+
     public CatalogItemProtos.CatalogItem getProto() {
         return mProto;
     }
@@ -95,6 +111,11 @@ public class CatalogItem extends BaseEventListener implements Observable {
         return mProto.downloadProgress;
     }
 
+    private void setDownloadProgress(int progress) {
+        mProto.downloadProgress = progress;
+        mPropertyChangeRegistry.notifyChange(this, BR.downloadProgress);
+    }
+
     @Bindable
     public Book getBook() {
         return mBook;
@@ -105,12 +126,33 @@ public class CatalogItem extends BaseEventListener implements Observable {
         return mProto.status;
     }
 
+    private synchronized void setStatus(int newStatus) {
+        int oldStatus = mProto.status;
+        if ((oldStatus == AVAILABLE && newStatus == UNAVAILABLE)
+                || (oldStatus == DOWNLOADING && newStatus == ERROR)
+                || (oldStatus == DOWNLOADING && newStatus == AVAILABLE)
+                || (oldStatus == DOWNLOADING && newStatus == UNAVAILABLE)
+                || (oldStatus == ERROR && newStatus == DOWNLOADING)
+                || (oldStatus == UNAVAILABLE && newStatus == DOWNLOADING)
+                ) {
+
+            Log.v(TAG,
+                    "transitioning from state " + STATUS_STRINGS[oldStatus]
+                            + " to " + STATUS_STRINGS[newStatus]);
+            mProto.status = newStatus;
+
+            mPropertyChangeRegistry.notifyChange(this, BR.status);
+        }
+    }
+
     public boolean isDownloading() {
         return mProto.status == DOWNLOADING;
     }
+
     public boolean isAvailable() {
         return mProto.status == AVAILABLE;
     }
+
     public boolean isErroring() {
         return mProto.status == ERROR;
     }
@@ -164,52 +206,8 @@ public class CatalogItem extends BaseEventListener implements Observable {
         }
     }
 
-    private void setDownloadProgress(int progress) {
-        mProto.downloadProgress = progress;
-        mPropertyChangeRegistry.notifyChange(this, BR.downloadProgress);
-    }
-
-    private synchronized void setStatus(int newStatus) {
-        int oldStatus = mProto.status;
-        if ((oldStatus == AVAILABLE && newStatus == UNAVAILABLE)
-                || (oldStatus == DOWNLOADING && newStatus == ERROR)
-                || (oldStatus == DOWNLOADING && newStatus == AVAILABLE)
-                || (oldStatus == DOWNLOADING && newStatus == UNAVAILABLE)
-                || (oldStatus == ERROR && newStatus == DOWNLOADING)
-                || (oldStatus == UNAVAILABLE && newStatus == DOWNLOADING)
-                ) {
-
-            Log.v(TAG,
-                    "transitioning from state " + STATUS_STRINGS[oldStatus]
-                    + " to " + STATUS_STRINGS[newStatus]);
-            mProto.status = newStatus;
-
-            mPropertyChangeRegistry.notifyChange(this, BR.status);
-        }
-    }
-
-    @BindingAdapter("catalogIconSource")
-    public static void setCatalogIconSource(ImageButton button, int status) {
-        switch (status) {
-            case AVAILABLE:
-                button.setImageResource(R.drawable.ic_delete);
-                break;
-
-            case UNAVAILABLE:
-                button.setImageResource(R.drawable.ic_download);
-                break;
-
-            case DOWNLOADING:
-                button.setImageResource(R.drawable.ic_cancel);
-                break;
-
-            case ERROR:
-                button.setImageResource(R.drawable.ic_error);
-                break;
-
-            default:
-                button.setImageResource(android.R.drawable.ic_dialog_alert);
-                break;
-        }
+    @IntDef({AVAILABLE, UNAVAILABLE, DOWNLOADING, ERROR})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ItemStatus {
     }
 }

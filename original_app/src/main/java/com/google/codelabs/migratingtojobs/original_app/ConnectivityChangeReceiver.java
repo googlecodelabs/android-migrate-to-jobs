@@ -28,16 +28,13 @@ import com.google.codelabs.migratingtojobs.common.EventBus;
 import javax.inject.Inject;
 
 public class ConnectivityChangeReceiver extends BroadcastReceiver {
-    private boolean mIsInitialized;
-
     @Inject
     EventBus bus;
-
     @Inject
     ConnectivityManager connManager;
-
     @Inject
     CatalogItemStore itemStore;
+    private boolean mIsInitialized;
 
     @Override
     public void onReceive(Context context, Intent intent) {

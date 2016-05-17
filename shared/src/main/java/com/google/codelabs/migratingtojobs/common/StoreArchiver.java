@@ -43,7 +43,8 @@ public final class StoreArchiver {
 
     private final SharedPreferences mSharedPreferences;
 
-    @Inject public StoreArchiver(SharedPreferences sharedPreferences) {
+    @Inject
+    public StoreArchiver(SharedPreferences sharedPreferences) {
         mSharedPreferences = sharedPreferences;
     }
 

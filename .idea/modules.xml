@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/android-migrate-to-jobs.iml" filepath="$PROJECT_DIR$/android-migrate-to-jobs.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jobscheduler/jobdownloads.iml" filepath="$PROJECT_DIR$/jobscheduler/jobdownloads.iml" />
       <module fileurl="file://$PROJECT_DIR$/jobscheduler/jobscheduler.iml" filepath="$PROJECT_DIR$/jobscheduler/jobscheduler.iml" />
       <module fileurl="file://$PROJECT_DIR$/original_app/original_app.iml" filepath="$PROJECT_DIR$/original_app/original_app.iml" />
       <module fileurl="file://$PROJECT_DIR$/shared/shared.iml" filepath="$PROJECT_DIR$/shared/shared.iml" />

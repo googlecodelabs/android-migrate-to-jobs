@@ -10,6 +10,21 @@ import javax.inject.Inject;
 
 public class JobSchedulerGlobalState {
     private static JobSchedulerGlobalState sInstance;
+    private final JobSchedulerComponent mComponent;
+    @Inject
+    SharedInitializer mSharedInitializer;
+    @Inject
+    EventBus mBus;
+    @Inject
+    JobSchedulingErrorListener mJobSchedulingErrorListener;
+
+    public JobSchedulerGlobalState(Application app) {
+        mComponent = DaggerJobSchedulerComponent.builder()
+                .appModule(new AppModule(app))
+                .build();
+
+        mComponent.inject(this);
+    }
 
     public static JobSchedulerComponent get(Application app) {
         if (sInstance == null) {
@@ -23,25 +38,6 @@ public class JobSchedulerGlobalState {
         }
 
         return sInstance.get();
-    }
-
-    private final JobSchedulerComponent mComponent;
-
-    @Inject
-    SharedInitializer mSharedInitializer;
-
-    @Inject
-    EventBus mBus;
-
-    @Inject
-    JobSchedulingErrorListener mJobSchedulingErrorListener;
-
-    public JobSchedulerGlobalState(Application app) {
-        mComponent = DaggerJobSchedulerComponent.builder()
-                .appModule(new AppModule(app))
-                .build();
-
-        mComponent.inject(this);
     }
 
     private void init() {

@@ -18,17 +18,15 @@ import javax.inject.Inject;
  */
 public final class DownloaderJobService extends JobService {
 
-    @Inject
-    EventBus bus;
-
-    @Inject
-    CatalogItemStore itemStore;
-
     /**
      * List of all listeners we register, so we can make sure they get unregistered when this
      * service goes away.
      */
     final List<EventListener> eventListeners = new LinkedList<>();
+    @Inject
+    EventBus bus;
+    @Inject
+    CatalogItemStore itemStore;
 
     @Override
     public void onCreate() {

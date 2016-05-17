@@ -11,6 +11,18 @@ import javax.inject.Inject;
 
 public class OriginalGlobalState {
     private static OriginalGlobalState sInstance;
+    private final OriginalComponent component;
+    @Inject
+    SharedInitializer sharedInitializer;
+    @Inject
+    EventBus bus;
+    public OriginalGlobalState(Context app) {
+        component = DaggerOriginalComponent.builder()
+                .appModule(new AppModule(app))
+                .build();
+
+        component.inject(this);
+    }
 
     public static OriginalComponent get(Context app) {
         if (sInstance == null) {
@@ -24,21 +36,6 @@ public class OriginalGlobalState {
         }
 
         return sInstance.get();
-    }
-
-    private final OriginalComponent component;
-
-    @Inject
-    SharedInitializer sharedInitializer;
-    @Inject
-    EventBus bus;
-
-    public OriginalGlobalState(Context app) {
-        component = DaggerOriginalComponent.builder()
-                .appModule(new AppModule(app))
-                .build();
-
-        component.inject(this);
     }
 
     private void init() {
