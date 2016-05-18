@@ -12,7 +12,7 @@ import dagger.Component;
 public interface OriginalComponent extends RootComponent {
     void inject(OriginalGlobalState originalGlobalState);
 
-    void inject(ErrorLoggingCatalogListActivity activity);
+    void inject(OriginalCatalogListActivity activity);
 
     void inject(ConnectivityChangeReceiver receiver);
 }
