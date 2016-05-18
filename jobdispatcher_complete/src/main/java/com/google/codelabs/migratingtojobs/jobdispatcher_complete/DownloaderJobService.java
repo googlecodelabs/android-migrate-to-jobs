@@ -1,7 +1,7 @@
 package com.google.codelabs.migratingtojobs.jobdispatcher_complete;
 
 import com.firebase.jobdispatcher.JobService;
-import com.firebase.jobdispatcher.JobSpec;
+import com.firebase.jobdispatcher.JobParameters;
 import com.google.codelabs.migratingtojobs.shared.BaseEventListener;
 import com.google.codelabs.migratingtojobs.shared.CatalogItem;
 import com.google.codelabs.migratingtojobs.shared.CatalogItemStore;
@@ -26,7 +26,7 @@ public class DownloaderJobService extends JobService {
     CatalogItemStore itemStore;
 
     @Override
-    public boolean onStartJob(JobSpec jobSpec) {
+    public boolean onStartJob(JobParameters jobSpec) {
         EventListener listener = new EventListener(this, jobSpec, bus);
         synchronized (eventListeners) {
             eventListeners.add(listener);
@@ -40,7 +40,7 @@ public class DownloaderJobService extends JobService {
     }
 
     @Override
-    public boolean onStopJob(JobSpec jobSpec) {
+    public boolean onStopJob(JobParameters jobSpec) {
         // If this is being called it means we haven't explicitly finished our work yet.
         // Return true so we get rescheduled.
         return false;
@@ -68,24 +68,24 @@ public class DownloaderJobService extends JobService {
 
     private final static class EventListener extends BaseEventListener {
         private final JobService service;
-        private final JobSpec jobSpec;
+        private final JobParameters jobParameters;
         private final EventBus bus;
 
-        public EventListener(JobService service, JobSpec jobSpec, EventBus bus) {
+        public EventListener(JobService service, JobParameters jobParameters, EventBus bus) {
             this.service = service;
-            this.jobSpec = jobSpec;
+            this.jobParameters = jobParameters;
             this.bus = bus;
         }
 
         @Override
         public void onItemDownloadFailed(CatalogItem item) {
-            service.jobFinished(jobSpec, true);
+            service.jobFinished(jobParameters, true);
             JobDispatcherEvents.postDownloadJobFailed(bus);
         }
 
         @Override
         public void onAllDownloadsFinished() {
-            service.jobFinished(jobSpec, false);
+            service.jobFinished(jobParameters, false);
             JobDispatcherEvents.postDownloadJobFinished(bus);
         }
     }

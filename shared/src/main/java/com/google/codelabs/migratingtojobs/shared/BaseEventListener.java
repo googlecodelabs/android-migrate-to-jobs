@@ -1,8 +1,10 @@
 package com.google.codelabs.migratingtojobs.shared;
 
+import android.os.Message;
+
 public class BaseEventListener implements EventBus.EventListener {
     @Override
-    public void handle(int what) {
+    public void handle(Message msg) {
     }
 
     @Override

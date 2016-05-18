@@ -11,21 +11,20 @@ import java.util.List;
 
 public class EventBus {
     private static final int INIT = 1;
-    private static final int ACTIVITY_CREATED = 1 << 1;
-    private static final int ACTIVITY_DESTROYED = 1 << 2;
-    private static final int ITEM_DOWNLOAD_FAILED = 1 << 3;
-    private static final int ITEM_DOWNLOAD_STARTED = 1 << 4;
-    private static final int ITEM_DOWNLOAD_FINISHED = 1 << 5;
-    private static final int ITEM_DOWNLOAD_CANCELLED = 1 << 6;
-    private static final int ITEM_DOWNLOAD_INTERRUPTED = 1 << 7;
-    private static final int ITEM_DOWNLOAD_INCREMENT_PROGRESS = 1 << 8;
-    private static final int ITEM_DELETE_LOCAL_COPY = 1 << 9;
-    private static final int REGISTER = 1 << 10;
-    private static final int UNREGISTER = 1 << 11;
-    private static final int ALL_DOWNLOADS_FINISHED = 1 << 12;
-    private static final int RETRY_DOWNLOADS = 1 << 13;
-
-    public static final int FIRST_UNUSED = 14;
+    private static final int ACTIVITY_CREATED = 2;
+    private static final int ACTIVITY_DESTROYED = 3;
+    private static final int ITEM_DOWNLOAD_FAILED = 4;
+    private static final int ITEM_DOWNLOAD_STARTED = 5;
+    private static final int ITEM_DOWNLOAD_FINISHED = 6;
+    private static final int ITEM_DOWNLOAD_CANCELLED = 7;
+    private static final int ITEM_DOWNLOAD_INTERRUPTED = 8;
+    private static final int ITEM_DOWNLOAD_INCREMENT_PROGRESS = 9;
+    private static final int ITEM_DELETE_LOCAL_COPY = 10;
+    private static final int REGISTER = 11;
+    private static final int UNREGISTER = 12;
+    private static final int ALL_DOWNLOADS_FINISHED = 13;
+    private static final int RETRY_DOWNLOADS = 14;
+    public static final int FIRST_UNUSED = 15;
 
     private final EventBusHandler handler;
 
@@ -103,7 +102,7 @@ public class EventBus {
     }
 
     public interface EventListener {
-        void handle(int what);
+        void handle(Message msg);
 
         void onInit(CatalogItemStore itemStore);
 
@@ -146,10 +145,10 @@ public class EventBus {
         }
 
         @Override
-        public void handle(int what) {
+        public void handle(Message msg) {
             synchronized (listeners) {
                 for (EventListener listener : listeners) {
-                    listener.handle(what);
+                    listener.handle(msg);
                 }
             }
         }
@@ -355,7 +354,7 @@ public class EventBus {
                     break;
 
                 default:
-                    listener.handle(msg.what);
+                    listener.handle(msg);
                     break;
             }
         }

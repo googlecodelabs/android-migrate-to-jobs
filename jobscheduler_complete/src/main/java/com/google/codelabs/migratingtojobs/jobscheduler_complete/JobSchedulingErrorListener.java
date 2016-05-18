@@ -20,6 +20,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -69,8 +70,8 @@ public class JobSchedulingErrorListener extends BaseEventListener {
     }
 
     @Override
-    public void handle(int what) {
-        if (what == JobSchedulerEvents.DOWNLOAD_JOB_FINISHED) {
+    public void handle(Message msg) {
+        if (msg.what == JobSchedulerEvents.DOWNLOAD_JOB_FINISHED) {
             synchronized (this) {
                 jobScheduled = false;
             }

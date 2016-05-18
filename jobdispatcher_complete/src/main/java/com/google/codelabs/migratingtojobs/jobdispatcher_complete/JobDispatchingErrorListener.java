@@ -1,5 +1,6 @@
 package com.google.codelabs.migratingtojobs.jobdispatcher_complete;
 
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -42,8 +43,8 @@ public class JobDispatchingErrorListener extends BaseEventListener {
     }
 
     @Override
-    public void handle(int what) {
-        if (what == JobDispatcherEvents.DOWNLOAD_JOB_FINISHED) {
+    public void handle(Message msg) {
+        if (msg.what == JobDispatcherEvents.DOWNLOAD_JOB_FINISHED) {
             synchronized (this) {
                 jobScheduled = false;
             }
