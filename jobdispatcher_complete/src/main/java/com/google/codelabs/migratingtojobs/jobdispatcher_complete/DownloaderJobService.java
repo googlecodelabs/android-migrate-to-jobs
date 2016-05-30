@@ -42,8 +42,8 @@ public class DownloaderJobService extends JobService {
     CatalogItemStore itemStore;
 
     @Override
-    public boolean onStartJob(JobParameters jobSpec) {
-        EventListener listener = new EventListener(this, jobSpec, bus);
+    public boolean onStartJob(JobParameters jobParameters) {
+        EventListener listener = new EventListener(this, jobParameters, bus);
         synchronized (eventListeners) {
             eventListeners.add(listener);
             bus.register(listener);
@@ -56,7 +56,7 @@ public class DownloaderJobService extends JobService {
     }
 
     @Override
-    public boolean onStopJob(JobParameters jobSpec) {
+    public boolean onStopJob(JobParameters jobParameters) {
         // If this is being called it means we haven't explicitly finished our work yet.
         // Return true so we get rescheduled.
         return false;
